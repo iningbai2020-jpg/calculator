@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>測試網頁</title>
+  <style>
+    /* === 全域樣式 === */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      margin: 20px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #e74c3c;
+    }
+
+    p {
+      font-size: 18px;
+      color: #333;
+    }
+
+    /* === 按鈕樣式 === */
+    button {
+      type: button; /* 避免表單自動 submit */
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 20px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      transition: background-color 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>這是測試網頁</h1>
+  <p>點下面按鈕看看互動效果</p>
+
+  <!-- 按鈕互動 -->
+  <button type="button" onclick="showAlert()">點我!</button>
+
+  <script>
+    // === JS 互動函數 ===
+    function showAlert() {
+      // 提示訊息
+      alert("你點到按鈕啦！");
+      console.log("按鈕被點擊！");
+    }
+
+    // 網頁載入確認
+    console.log("網頁已載入完成");
+
+    // 未來可以在這裡新增更多互動函數
+  </script>
+
+</body>
+</html>
