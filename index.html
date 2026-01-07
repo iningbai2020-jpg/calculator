@@ -1,67 +1,208 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>測試網頁</title>
-  <style>
-    /* === 全域樣式 === */
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f0f0f0;
-      margin: 20px;
-      text-align: center;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ningpro International Aesthetics - 報價計算機</title>
 
-    h1 {
-      color: #e74c3c;
-    }
+<style>
+:root{
+  --bg:#F5F5F7;
+  --card:#FFFFFF;
+  --text:#4A3E3E;
+  --accent:#C2A38E;
+  --soft:#E8DCD3;
+}
 
-    p {
-      font-size: 18px;
-      color: #333;
-    }
+body{
+  margin:0;
+  background:var(--bg);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial;
+  color:var(--text);
+}
 
-    /* === 按鈕樣式 === */
-    button {
-      type: button; /* 避免表單自動 submit */
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      margin-top: 20px;
-      background-color: #3498db;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      transition: background-color 0.2s ease;
-    }
+.wrapper{max-width:420px;margin:40px auto;padding:0 16px;}
+.card{
+  background:var(--card);
+  border-radius:20px;
+  padding:30px 26px 32px;
+  box-shadow:0 16px 36px rgba(0,0,0,.08);
+}
 
-    button:hover {
-      background-color: #2980b9;
-    }
-  </style>
+.brand{text-align:center;margin-bottom:12px;}
+.brand img{width:120px;animation:float 4.5s ease-in-out infinite;}
+@keyframes float{0%{transform:translateY(0);opacity:.85;}50%{transform:translateY(-6px);opacity:1;}100%{transform:translateY(0);opacity:.85;}}
+
+h1{text-align:center;font-size:1.25rem;margin-bottom:24px;}
+
+label{font-size:.82rem;display:block;margin-bottom:6px;}
+input,select{width:100%;padding:14px 16px;border-radius:14px;border:1px solid #ddd;margin-bottom:18px;}
+
+button{
+  width:100%;padding:16px;border:none;border-radius:18px;
+  background:var(--accent);color:#fff;font-weight:600;
+  cursor:pointer;
+}
+
+.result{text-align:center;display:none;margin-top:26px;}
+.ntd{font-size:2.2rem;font-weight:700;}
+.usd{font-size:.9rem;opacity:.65;}
+
+.disclaimer{
+  margin-top:28px;font-size:.75rem;line-height:1.55;
+  color:#7A6A6A;border-top:1px solid var(--soft);padding-top:14px;
+}
+
+.modal{
+  position:fixed;inset:0;background:rgba(0,0,0,.35);
+  display:none;align-items:center;justify-content:center;
+}
+.modal-box{
+  background:#fff;border-radius:18px;padding:22px 20px;
+  max-width:300px;text-align:center;
+}
+.modal-box button{margin-top:12px;}
+</style>
 </head>
+
 <body>
+<div class="wrapper">
+<div class="card">
 
-  <h1>這是測試網頁</h1>
-  <p>點下面按鈕看看互動效果</p>
+<div class="brand"><img src="logo.png" alt="brand"></div>
 
-  <!-- 按鈕互動 -->
-  <button type="button" onclick="showAlert()">點我!</button>
+<h1>國際美學精品委任報價</h1>
 
-  <script>
-    // === JS 互動函數 ===
-    function showAlert() {
-      // 提示訊息
-      alert("你點到按鈕啦！");
-      console.log("按鈕被點擊！");
-    }
+<!-- 客戶姓名 -->
+<label>客戶姓名</label>
+<input id="customer" placeholder="例：王小明">
 
-    // 網頁載入確認
-    console.log("網頁已載入完成");
+<!-- 商品名稱 -->
+<label>商品名稱</label>
+<input id="item" placeholder="例：限定色奶茶杯">
 
-    // 未來可以在這裡新增更多互動函數
-  </script>
+<!-- USD 報價 -->
+<label>海外採購參考金額（USD）</label>
+<input id="usd" type="number" placeholder="僅作國際價格參考">
 
+<!-- 採購來源 -->
+<label>採購來源（內部）</label>
+<select id="src">
+  <option value="official">官網 / 官方</option>
+  <option value="relative">親戚 / 熟人</option>
+  <option value="risk">非固定來源</option>
+</select>
+
+<!-- 法律聲明勾選 -->
+<label>
+  <input type="checkbox" id="agree">
+  我已閱讀並同意不可取消與不退貨聲明
+</label>
+
+<button id="calcBtn">產生專屬報價</button>
+
+<div class="result" id="result">
+  <div class="ntd" id="ntd">NT$ 0</div>
+  <div class="usd" id="usdShow">USD 0</div>
+  <div class="orderID" id="orderID">報價單號：-</div>
+</div>
+
+<div class="disclaimer" id="disclaimer"></div>
+
+</div>
+</div>
+
+<div class="modal" id="modal">
+  <div class="modal-box">
+    ✨ 感謝您欣賞獨到的眼光<br>
+    期待為您提供專屬的美學委任服務
+    <button id="modalClose">確認</button>
+  </div>
+</div>
+
+<script>
+/* ===== 可調整設定 ===== */
+const CONFIG = {
+  exchangeRate: 33.5,   // USD → TWD 參考匯率
+  multiplier: {          // 不同採購來源倍數
+    official: 1.8,
+    relative: 1.95,
+    risk: 2.1
+  },
+  disclaimerText: `
+本服務屬「國際委任代訂與顧問勞務性質」，非一般商品買賣契約。
+一經確認委任並下訂，即視為委任成立，恕不接受取消、退貨或退款。
+已產生之採購款項、匯率風險、物流安排、時間成本與顧問勞務，
+上述費用於委任成立後即不可撤回。`
+};
+
+/* ===== 顯示法律聲明 ===== */
+document.getElementById("disclaimer").innerHTML = CONFIG.disclaimerText;
+
+/* ===== 核心計算邏輯 ===== */
+document.getElementById("calcBtn").addEventListener("click", () => {
+  if(!document.getElementById("agree").checked){
+    alert("請先同意不可取消與不退貨聲明");
+    return;
+  }
+
+  const usd = parseFloat(document.getElementById("usd").value);
+  const customer = document.getElementById("customer").value.trim();
+  const item = document.getElementById("item").value.trim();
+  if(!usd || !customer || !item) { alert("請填寫完整資料"); return; }
+
+  const src = document.getElementById("src").value;
+  const m = CONFIG.multiplier[src];
+
+  const ntd = Math.ceil(usd * CONFIG.exchangeRate * m);
+
+  // 產生客戶訂單編號
+  const today = new Date();
+  const y = String(today.getFullYear()).slice(2);
+  const mth = String(today.getMonth()+1).padStart(2,'0');
+  const d = String(today.getDate()).padStart(2,'0');
+  const orderNum = Math.floor(Math.random()*99+1).toString().padStart(2,'0');
+  const orderID = `${y}${mth}${d}-WXM-P-${orderNum}`;
+
+  // 顯示結果
+  document.getElementById("ntd").innerText = "NT$ " + ntd.toLocaleString();
+  document.getElementById("usdShow").innerText = "USD " + usd.toLocaleString();
+  document.getElementById("orderID").innerText = "報價單號：" + orderID;
+  document.getElementById("result").style.display = "block";
+
+  // 彈出感謝訊息
+  if(!sessionStorage.getItem("greeted")){
+    document.getElementById("modal").style.display = "flex";
+    sessionStorage.setItem("greeted","1");
+  }
+
+  /* ===== 傳送到 Notion API 範例（框架） ===== */
+  // const notionToken = "YOUR_NOTION_API_TOKEN";
+  // const databaseId = "YOUR_SUB_DATABASE_ID";
+  // fetch(`https://api.notion.com/v1/pages`, {
+  //   method: "POST",
+  //   headers: {
+  //     "Authorization": `Bearer ${notionToken}`,
+  //     "Content-Type": "application/json",
+  //     "Notion-Version": "2022-06-28"
+  //   },
+  //   body: JSON.stringify({
+  //     parent: { database_id: databaseId },
+  //     properties: {
+  //       "客戶訂單編號": { "title": [{ "text": { "content": orderID } }] },
+  //       "客戶姓名": { "rich_text": [{ "text": { "content": customer } }] },
+  //       "商品名稱": { "rich_text": [{ "text": { "content": item } }] },
+  //       "USD": { "number": usd },
+  //       "NTD": { "number": ntd }
+  //     }
+  //   })
+  // });
+
+});
+
+document.getElementById("modalClose").addEventListener("click", ()=>{
+  document.getElementById("modal").style.display="none";
+});
+</script>
 </body>
 </html>
